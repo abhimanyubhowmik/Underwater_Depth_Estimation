@@ -5,11 +5,12 @@ from torch.utils.data import Dataset
 import wandb
 
 
+
 class PEFTTraining:
 
     def __init__(self, model_checkpoint: str,output_dir: str, model, train_dataset: Dataset, 
                  valid_dataset: Dataset, train_batch_size:int, valid_batch_size:int , 
-                 loss_fn, optimizer, epoch: int, device, wandb_logging = True) -> None:
+                 loss_fn, optimizer,scheduler, epoch: int, device, wandb_logging = True) -> None:
 
         self.loss_fn = loss_fn
         self.optimizer = optimizer
@@ -23,6 +24,7 @@ class PEFTTraining:
         self.model_name = model_checkpoint.split("/")[-1]
         self.training_loader = torch.utils.data.DataLoader(train_dataset, batch_size= train_batch_size, shuffle=True)
         self.validation_loader = torch.utils.data.DataLoader(valid_dataset, batch_size= valid_batch_size, shuffle=False)
+        self.lr_scheduler = scheduler
         
 
 
@@ -50,6 +52,9 @@ class PEFTTraining:
 
             # Adjust learning weights
             self.optimizer.step()
+
+            # Adjust the learning rate 
+            self.lr_scheduler.step()
 
             # Gather data and report
             running_loss += loss.item()

@@ -12,7 +12,7 @@ from torchvision.transforms import (
     RandomResizedCrop,
     ToTensor,
 )
-
+from torch.optim.lr_scheduler import CosineAnnealingLR
 
 ### Config
 MODEL_CHECKPOINT = "LiheYoung/depth-anything-small-hf"
@@ -80,6 +80,8 @@ elif OPTIM == "ADAM":
 else:
     print("Optimizer not yet implemented")
 
+#initialize scheduler
+scheduler = CosineAnnealingLR(optimizer, T_max=10, eta_min=0)
 
 user = WANDB_USER
 project = WANDB_PROJECT
@@ -89,7 +91,7 @@ config = {"lr": LEARNING_RATE, "batch_size": TRAIN_BATCH_SIZE}
 logger = wandb.init(entity=user, project=project, name=display_name, config=config)
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 trainer = PEFTTraining(MODEL_CHECKPOINT,OUTPUT_DIR,lora_model,train_dataset,valid_dataset,
-                     TRAIN_BATCH_SIZE, VALID_BATCH_SIZE, LOSS, optimizer, EPOCH, device, True)
+                     TRAIN_BATCH_SIZE, VALID_BATCH_SIZE, LOSS, optimizer,scheduler, EPOCH, device, True)
 
 trainer.train(logger)
 logger.finish()
