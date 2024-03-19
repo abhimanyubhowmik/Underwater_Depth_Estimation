@@ -44,7 +44,8 @@ class PEFTTraining:
             outputs = self.model(inputs).predicted_depth
 
             # Compute the loss and its gradients
-            loss = self.loss_fn(outputs, labels)
+            
+            loss = self.loss_fn(torch.squeeze(outputs), torch.squeeze(labels))
             loss.backward()
 
             # Adjust learning weights
@@ -87,7 +88,7 @@ class PEFTTraining:
                 for i, (vinputs, vlabels) in enumerate(self.validation_loader):
                     vinputs, vlabels = vinputs.to(self.device),vlabels.to(self.device)
                     voutputs = self.model(vinputs).predicted_depth
-                    vloss = self.loss_fn(voutputs, vlabels)
+                    vloss = self.loss_fn(torch.squeeze(voutputs), torch.squeeze(vlabels))
                     self.eval.compute_metrics(vinputs,voutputs,vlabels)
                     running_vloss += vloss
 
@@ -114,7 +115,6 @@ class PEFTTraining:
                         artifact = wandb.Artifact('model', type='model')
                         artifact.add_file(model_path)
                         wandb_init.log_artifact(artifact)
-                        wandb_init.finish()
                     else:
                         print("No WandB init given; model artifact is not saved")
 

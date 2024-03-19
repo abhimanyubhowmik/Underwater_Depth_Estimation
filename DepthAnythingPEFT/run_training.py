@@ -17,23 +17,23 @@ from torchvision.transforms import (
 ### Config
 MODEL_CHECKPOINT = "LiheYoung/depth-anything-small-hf"
 DATASET_ROOT_DIR = "/mundus/abhowmik697/FLSea_Dataset"
-OUTPUT_DIR = "./depth-anything-small-lora"
+OUTPUT_DIR = "DepthAnything/scripts/depth-anything-small-lora"
 WANDB_USER = "researchpapers"
 WANDB_PROJECT = "peft_training"
 
 ### Hyperparameters
 TRAIN_BATCH_SIZE = 4
 VALID_BATCH_SIZE = 4
-DATA_USE_PERCENTAGE = 2
+DATA_USE_PERCENTAGE = 100
 TRAIN_SPLIT = 0.8
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.1
 LOSS = nn.MSELoss()
 OPTIM = "AdamW"
-EPOCH = 5
+EPOCH = 50
 EXPERIMENT_NUM = 1
 LORA_RANK = 16
 LORA_ALPHA = 32
-LORA_DROPOUT = 0.1
+LORA_DROPOUT = 0.001
 BIAS = "lora_only"
 
 
@@ -92,3 +92,4 @@ trainer = PEFTTraining(MODEL_CHECKPOINT,OUTPUT_DIR,lora_model,train_dataset,vali
                      TRAIN_BATCH_SIZE, VALID_BATCH_SIZE, LOSS, optimizer, EPOCH, device, True)
 
 trainer.train(logger)
+logger.finish()

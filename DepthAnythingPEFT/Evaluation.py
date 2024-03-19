@@ -30,9 +30,17 @@ class EvaluationMetric:
         # Adjust the second depth map by the offset
         depth_map2_adjusted = depth_map2_scaled + offset
 
+        val_min = depth_map1.min()
+        val_range = depth_map1.max() - val_min
+
+        depth_map1_normed = (depth_map1 - val_min) / val_range
+        # apply identical normalization to the denoised image (important!)
+        depth_map2_adjusted_normed = (depth_map2_adjusted - val_min) / val_range
+
+
 
         #Calculate the PSNR
-        psnr_val = psnr(depth_map1, depth_map2_adjusted)
+        psnr_val = psnr(depth_map1_normed, depth_map2_adjusted_normed, data_range=1.0)
 
         return psnr_val
 
@@ -54,8 +62,15 @@ class EvaluationMetric:
         # Adjust the second depth map by the offset
         depth_map2_adjusted = depth_map2_scaled + offset
 
+        val_min = depth_map1.min()
+        val_range = depth_map1.max() - val_min
+
+        depth_map1_normed = (depth_map1 - val_min) / val_range
+        # apply identical normalization to the denoised image (important!)
+        depth_map2_adjusted_normed = (depth_map2_adjusted - val_min) / val_range
+
         # Calculate the SSIM
-        ssim_value, _ = ssim(depth_map1, depth_map2_adjusted, full=True)
+        ssim_value, _ = ssim(depth_map1_normed, depth_map2_adjusted_normed, full=True, data_range=1.0)
 
         return ssim_value
 
@@ -65,9 +80,11 @@ class EvaluationMetric:
 
         with torch.no_grad():
             predicted_depth = outputs
+            img_size = fn.get_image_size(input_image)
+            img_size.reverse()
             prediction = torch.nn.functional.interpolate(
             predicted_depth.unsqueeze(1),
-            size = fn.get_image_size(input_image).reverse(),
+            size = img_size,
             mode = "bicubic",
             align_corners=False)
             
@@ -77,16 +94,21 @@ class EvaluationMetric:
 
             # Handle invalid or unexpected depth values
             depth_output[depth_output <= 0] = 1e-7  # Replace negative or zero values with a small epsilon
-
+            gt_depth = np.squeeze(gt_depth,axis=1)
+            gt_depth[gt_depth <= 0] = 1e-7 
             # Calculate metrics
-            non_zero_mask = depth_output != 0
-            absrel = np.mean(np.abs(depth_output[non_zero_mask] - gt_depth[non_zero_mask]) / gt_depth[non_zero_mask])
+            #non_zero_mask = depth_output != 0
+            absrel = np.mean(np.abs(depth_output - gt_depth) / gt_depth)
 
             d = np.log(gt_depth + 1e-7) - np.log(depth_output + 1e-7)
             silog = np.mean(np.square(d)) - np.square(np.sum(d))/ np.square(d.size)
             pearson_corr = scipy.stats.pearsonr(depth_output.flatten(), gt_depth.flatten())[0]
             psnr_val = self.scale_offset_invariance_psnr(gt_depth,depth_output)
-            ssim_val = self.scale_offset_invariance_ssim(gt_depth,depth_output)
+            ssim_list = []
+            for i in range(gt_depth.shape[0]):
+                ssim_list.append(self.scale_offset_invariance_ssim(gt_depth[i],depth_output[i]))
+            ssim_val = np.mean(np.array(ssim_list))
+            
 
             if self.logging == True:
 
