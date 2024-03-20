@@ -1,0 +1,8 @@
+wandb: Currently logged in as: abhimnayu (researchpapers). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.16.4
+wandb: Run data is saved locally in /baie/nfs-cluster-1/mundus/abhowmik697/wandb/run-20240319_222446-junzbx7h
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run experiment1
+wandb: ⭐️ View project at https://wandb.ai/researchpapers/peft_training
+wandb: 🚀 View run at https://wandb.ai/researchpapers/peft_training/runs/junzbx7h
+slurmstepd: error: *** JOB 1501397 ON lisnode2 CANCELLED AT 2024-03-20T04:54:38 DUE TO TIME LIMIT ***

@@ -12,7 +12,7 @@ from torchvision.transforms import (
     RandomResizedCrop,
     ToTensor,
 )
-from torch.optim.lr_scheduler import CosineAnnealingLR
+
 
 ### Config
 MODEL_CHECKPOINT = "LiheYoung/depth-anything-small-hf"
@@ -24,17 +24,22 @@ WANDB_PROJECT = "peft_training"
 ### Hyperparameters
 TRAIN_BATCH_SIZE = 4
 VALID_BATCH_SIZE = 4
-DATA_USE_PERCENTAGE = 100
+DATA_USE_PERCENTAGE = 50
 TRAIN_SPLIT = 0.8
-LEARNING_RATE = 0.1
+LEARNING_RATE = 0.001
 LOSS = nn.MSELoss()
 OPTIM = "AdamW"
-EPOCH = 50
+EPOCH = 25
 EXPERIMENT_NUM = 1
 LORA_RANK = 16
 LORA_ALPHA = 32
 LORA_DROPOUT = 0.001
 BIAS = "lora_only"
+WARMUP_PERIOD = 1000
+T0 = 10
+T_MULT = 2
+
+
 
 
 model = DepthAnythingPEFT(model_checkpoint = MODEL_CHECKPOINT)
@@ -80,18 +85,19 @@ elif OPTIM == "ADAM":
 else:
     print("Optimizer not yet implemented")
 
-#initialize scheduler
-scheduler = CosineAnnealingLR(optimizer, T_max=10, eta_min=0)
 
 user = WANDB_USER
 project = WANDB_PROJECT
 display_name = f"experiment{EXPERIMENT_NUM}"
-config = {"lr": LEARNING_RATE, "batch_size": TRAIN_BATCH_SIZE}
+config = {"lr": LEARNING_RATE, "batch_size": TRAIN_BATCH_SIZE, "data_used(%)" : DATA_USE_PERCENTAGE, "train_split": TRAIN_SPLIT, "loss": "mse",
+           "optimizer" : OPTIM, "epoch": EPOCH, "lora_rank": LORA_RANK, "lora_alpha": LORA_ALPHA, "lora_dropout" :LORA_DROPOUT, "bias":BIAS, 
+           "warmup_period":WARMUP_PERIOD,"t0": T0,"t_mult" :T_MULT}
 
 logger = wandb.init(entity=user, project=project, name=display_name, config=config)
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 trainer = PEFTTraining(MODEL_CHECKPOINT,OUTPUT_DIR,lora_model,train_dataset,valid_dataset,
-                     TRAIN_BATCH_SIZE, VALID_BATCH_SIZE, LOSS, optimizer,scheduler, EPOCH, device, True)
+                     TRAIN_BATCH_SIZE, VALID_BATCH_SIZE, LOSS, optimizer, EPOCH, device, 
+                     WARMUP_PERIOD,T0, T_MULT, True)
 
 trainer.train(logger)
 logger.finish()

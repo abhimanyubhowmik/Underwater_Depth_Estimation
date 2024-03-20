@@ -3,14 +3,14 @@ from Evaluation import EvaluationMetric
 import torch
 from torch.utils.data import Dataset
 import wandb
-
+import pytorch_warmup as warmup
 
 
 class PEFTTraining:
 
     def __init__(self, model_checkpoint: str,output_dir: str, model, train_dataset: Dataset, 
                  valid_dataset: Dataset, train_batch_size:int, valid_batch_size:int , 
-                 loss_fn, optimizer,scheduler, epoch: int, device, wandb_logging = True) -> None:
+                 loss_fn, optimizer, epoch: int, device, warmup_period, T_0, T_mult, wandb_logging = True) -> None:
 
         self.loss_fn = loss_fn
         self.optimizer = optimizer
@@ -24,7 +24,10 @@ class PEFTTraining:
         self.model_name = model_checkpoint.split("/")[-1]
         self.training_loader = torch.utils.data.DataLoader(train_dataset, batch_size= train_batch_size, shuffle=True)
         self.validation_loader = torch.utils.data.DataLoader(valid_dataset, batch_size= valid_batch_size, shuffle=False)
-        self.lr_scheduler = scheduler
+        self.num_steps = len(self.training_loader) * self.epoch
+        self.warmup_period = warmup_period
+        self.lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(self.optimizer, T_0=T_0, T_mult=T_mult)
+        self.warmup_scheduler = warmup.LinearWarmup(self.optimizer, warmup_period=self.warmup_period)
         
 
 
@@ -53,16 +56,18 @@ class PEFTTraining:
             # Adjust learning weights
             self.optimizer.step()
 
-            # Adjust the learning rate 
-            self.lr_scheduler.step()
+            with self.warmup_scheduler.dampening():
+                if self.warmup_scheduler.last_step + 1 >= self.warmup_period:
+                    self.lr_scheduler.step()
 
             # Gather data and report
             running_loss += loss.item()
             if i % 16 == 15:
                 last_loss = running_loss / 16 # loss per batch
                 print('  batch {} loss: {}'.format(i + 1, last_loss))
-                wb_x = epoch_index * len(self.training_loader) + i + 1
-                wandb.log({'Loss/train (per batch)': last_loss}, step = wb_x)
+                #wb_x = epoch_index * len(self.training_loader) + i + 1
+                wandb.log({'Loss/train (per batch)': last_loss})
+                wandb.log({'Learning Rate (per batch)':  self.optimizer.param_groups[0]["lr"]})
                 running_loss = 0.
 
         return last_loss
@@ -103,7 +108,7 @@ class PEFTTraining:
             # Log the running loss averaged per batch
             # for both training and validation
             if self.logging == True:
-                wandb.log({ 'Training' : avg_loss, 'Validation' : avg_vloss })
+                wandb.log({ 'Training Loss' : avg_loss, 'Validation Loss' : avg_vloss })
 
             # Track best performance, and save the model's state
             if avg_vloss < best_vloss:

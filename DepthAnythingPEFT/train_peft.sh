@@ -5,6 +5,6 @@
 #SBATCH --error=DepthAnything/scripts/depthAnthingPEFT.err
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1
-#SBATCH --time=03:00:00
+#SBATCH --time=06:30:00
 
 python DepthAnything/scripts/run_training.py

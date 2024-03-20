@@ -31,13 +31,11 @@ class EvaluationMetric:
         depth_map2_adjusted = depth_map2_scaled + offset
 
         val_min = depth_map1.min()
-        val_range = depth_map1.max() - val_min
+        val_range = depth_map1.max() - val_min + 1e-7
 
         depth_map1_normed = (depth_map1 - val_min) / val_range
         # apply identical normalization to the denoised image (important!)
         depth_map2_adjusted_normed = (depth_map2_adjusted - val_min) / val_range
-
-
 
         #Calculate the PSNR
         psnr_val = psnr(depth_map1_normed, depth_map2_adjusted_normed, data_range=1.0)
@@ -63,7 +61,7 @@ class EvaluationMetric:
         depth_map2_adjusted = depth_map2_scaled + offset
 
         val_min = depth_map1.min()
-        val_range = depth_map1.max() - val_min
+        val_range = depth_map1.max() - val_min + 1e-7
 
         depth_map1_normed = (depth_map1 - val_min) / val_range
         # apply identical normalization to the denoised image (important!)
@@ -94,7 +92,7 @@ class EvaluationMetric:
 
             # Handle invalid or unexpected depth values
             depth_output[depth_output <= 0] = 1e-7  # Replace negative or zero values with a small epsilon
-            gt_depth = np.squeeze(gt_depth,axis=1)
+            gt_depth = np.squeeze(gt_depth)
             gt_depth[gt_depth <= 0] = 1e-7 
             # Calculate metrics
             #non_zero_mask = depth_output != 0
