@@ -4,13 +4,15 @@ import torch
 from torch.utils.data import Dataset
 import wandb
 import pytorch_warmup as warmup
+import math
 
 
 class PEFTTraining:
 
     def __init__(self, model_checkpoint: str,output_dir: str, model, train_dataset: Dataset, 
                  valid_dataset: Dataset, train_batch_size:int, valid_batch_size:int , 
-                 loss_fn, optimizer, epoch: int, device, warmup_period, T_0, T_mult, wandb_logging = True) -> None:
+                 loss_fn, optimizer, epoch: int, device, warmup_period_percentage,
+                 learning_rate,min_lr,grad_clip, wandb_logging = True) -> None:
 
         self.loss_fn = loss_fn
         self.optimizer = optimizer
@@ -25,10 +27,28 @@ class PEFTTraining:
         self.training_loader = torch.utils.data.DataLoader(train_dataset, batch_size= train_batch_size, shuffle=True)
         self.validation_loader = torch.utils.data.DataLoader(valid_dataset, batch_size= valid_batch_size, shuffle=False)
         self.num_steps = len(self.training_loader) * self.epoch
-        self.warmup_period = warmup_period
-        self.lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(self.optimizer, T_0=T_0, T_mult=T_mult)
-        self.warmup_scheduler = warmup.LinearWarmup(self.optimizer, warmup_period=self.warmup_period)
+        self.learning_rate = learning_rate
+        self.min_lr = min_lr
+        self.grad_clip = grad_clip
+        self.iter_per_epoch = len(train_dataset)/train_batch_size
+        self.lr_decay_iters = int(self.iter_per_epoch * epoch) + 1
+        self.warmup_period = self.lr_decay_iters*warmup_period_percentage/100
+        # self.lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(self.optimizer, T_0=T_0, T_mult=T_mult)
+        # self.warmup_scheduler = warmup.LinearWarmup(self.optimizer, warmup_period=self.warmup_period)
         
+    # learning rate decay scheduler (cosine with warmup)
+    def get_lr(self,iteration):
+        # 1) linear warmup for warmup_iters steps
+        if iteration < self.warmup_period:
+            return self.learning_rate * iteration / self.warmup_period
+        # 2) if it > lr_decay_iters, return min learning rate
+        if iteration > self.lr_decay_iters:
+            return self.min_lr
+        # 3) in between, use cosine decay down to min learning rate
+        decay_ratio = (iteration - self.warmup_period) / (self.lr_decay_iters - self.warmup_period)
+        assert 0 <= decay_ratio <= 1
+        coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio)) # coeff ranges 0..1
+        return self.min_lr + coeff * (self.learning_rate - self.min_lr)
 
 
     def train_one_epoch(self, epoch_index):
@@ -38,9 +58,19 @@ class PEFTTraining:
         # Here, we use enumerate(training_loader) instead of
         # iter(training_loader) so that we can track the batch
         # index and do some intra-epoch reporting
+        iteration = epoch_index * self.iter_per_epoch
         for i, (inputs, labels) in enumerate(self.training_loader):
             # Every data instance is an input + label pair
             inputs, labels = inputs.to(self.device),labels.to(self.device)
+
+            # determine and set the learning rate for this iteration
+            lr = self.get_lr(iteration)
+            for param_group in self.optimizer.param_groups:
+                param_group['lr'] = lr
+
+            # clip the gradient
+            if self.grad_clip != 0.0:
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.grad_clip)
 
             # Zero your gradients for every batch!
             self.optimizer.zero_grad()
