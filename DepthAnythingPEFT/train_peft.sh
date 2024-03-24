@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #SBATCH --job-name=depthAnthingPEFT
-#SBATCH --output=DepthAnything/scripts/depthAnthingPEFT.out
-#SBATCH --error=DepthAnything/scripts/depthAnthingPEFT.err
+#SBATCH --output=depthest/Underwater_Depth_Estimation/DepthAnythingPEFT/depthAnthingPEFT.out
+#SBATCH --error=depthest/Underwater_Depth_Estimation/DepthAnythingPEFT/depthAnthingPEFT.err
 #SBATCH --partition=mundus
 #SBATCH --gres=gpu:a100-20:1
-#SBATCH --time=07:30:00
+#SBATCH --time=07:00:00
 
-python DepthAnything/scripts/run_training.py
+python depthest/Underwater_Depth_Estimation/DepthAnythingPEFT/run_training.py

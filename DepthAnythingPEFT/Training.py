@@ -3,7 +3,6 @@ from Evaluation import EvaluationMetric
 import torch
 from torch.utils.data import Dataset
 import wandb
-#import pytorch_warmup as warmup
 import math
 import os
 
@@ -24,8 +23,8 @@ class PEFTTraining:
         self.eval = EvaluationMetric(wandb_logging)
         self.device = device
         self.model.to(self.device)
-        self.model_name = model_checkpoint.split("/")[-1]
         self.train_batch_size = train_batch_size
+        self.model_name = model_checkpoint.split("/")[-1]
         self.training_loader = torch.utils.data.DataLoader(train_dataset, batch_size= train_batch_size, shuffle=True)
         self.validation_loader = torch.utils.data.DataLoader(valid_dataset, batch_size= valid_batch_size, shuffle=False)
         self.num_steps = len(self.training_loader) * self.epoch
@@ -96,7 +95,7 @@ class PEFTTraining:
             running_loss += loss.item()
             iteration += 1
             if i % self.train_batch_size == self.train_batch_size - 1:
-                last_loss = running_loss / self.train_batch_size # loss per batch
+                last_loss = running_loss / self.train_batch_size
                 print('  batch {} loss: {}'.format(i + 1, last_loss))
                 #wb_x = epoch_index * len(self.training_loader) + i + 1
                 wandb.log({'Loss/train (per batch)': last_loss})
