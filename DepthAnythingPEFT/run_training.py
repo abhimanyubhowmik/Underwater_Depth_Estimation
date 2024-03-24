@@ -22,8 +22,8 @@ WANDB_USER = "researchpapers"
 WANDB_PROJECT = "peft_training"
 
 ### Hyperparameters
-TRAIN_BATCH_SIZE = 128
-VALID_BATCH_SIZE = 128
+TRAIN_BATCH_SIZE = 64
+VALID_BATCH_SIZE = 64
 DATA_USE_PERCENTAGE = 100
 TRAIN_SPLIT = 0.8
 LEARNING_RATE = 0.001
@@ -91,7 +91,7 @@ project = WANDB_PROJECT
 display_name = f"experiment{EXPERIMENT_NUM}"
 config = {"lr": LEARNING_RATE, "batch_size": TRAIN_BATCH_SIZE, "data_used(%)" : DATA_USE_PERCENTAGE, "train_split": TRAIN_SPLIT, "loss": "mse",
            "optimizer" : OPTIM, "epoch": EPOCH, "lora_rank": LORA_RANK, "lora_alpha": LORA_ALPHA, "lora_dropout" :LORA_DROPOUT, "bias":BIAS, 
-           "warmup_period":WARMUP_PERIOD,"min_lr": MIN_LR,"grad_clip" :GRAD_CLIP}
+           "warmup_period":WARMUP_PERIOD_PERCENTAGE,"min_lr": MIN_LR,"grad_clip" :GRAD_CLIP}
 
 logger = wandb.init(entity=user, project=project, name=display_name, config=config)
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')

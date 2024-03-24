@@ -3,7 +3,7 @@ from Evaluation import EvaluationMetric
 import torch
 from torch.utils.data import Dataset
 import wandb
-import pytorch_warmup as warmup
+#import pytorch_warmup as warmup
 import math
 
 
@@ -65,8 +65,7 @@ class PEFTTraining:
 
             # determine and set the learning rate for this iteration
             lr = self.get_lr(iteration)
-            for param_group in self.optimizer.param_groups:
-                param_group['lr'] = lr
+            self.optimizer.param_groups[0]["lr"] = lr
 
             # clip the gradient
             if self.grad_clip != 0.0:
@@ -86,12 +85,14 @@ class PEFTTraining:
             # Adjust learning weights
             self.optimizer.step()
 
-            with self.warmup_scheduler.dampening():
-                if self.warmup_scheduler.last_step + 1 >= self.warmup_period:
-                    self.lr_scheduler.step()
+            # with self.warmup_scheduler.dampening():
+            #     if self.warmup_scheduler.last_step + 1 >= self.warmup_period:
+            #         self.lr_scheduler.step()
 
             # Gather data and report
+          
             running_loss += loss.item()
+            iteration += 1
             if i % 16 == 15:
                 last_loss = running_loss / 16 # loss per batch
                 print('  batch {} loss: {}'.format(i + 1, last_loss))
