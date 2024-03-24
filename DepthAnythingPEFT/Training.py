@@ -5,6 +5,7 @@ from torch.utils.data import Dataset
 import wandb
 #import pytorch_warmup as warmup
 import math
+import os
 
 
 class PEFTTraining:
@@ -24,6 +25,7 @@ class PEFTTraining:
         self.device = device
         self.model.to(self.device)
         self.model_name = model_checkpoint.split("/")[-1]
+        self.train_batch_size = train_batch_size
         self.training_loader = torch.utils.data.DataLoader(train_dataset, batch_size= train_batch_size, shuffle=True)
         self.validation_loader = torch.utils.data.DataLoader(valid_dataset, batch_size= valid_batch_size, shuffle=False)
         self.num_steps = len(self.training_loader) * self.epoch
@@ -93,8 +95,8 @@ class PEFTTraining:
           
             running_loss += loss.item()
             iteration += 1
-            if i % 16 == 15:
-                last_loss = running_loss / 16 # loss per batch
+            if i % self.train_batch_size == self.train_batch_size - 1:
+                last_loss = running_loss / self.train_batch_size # loss per batch
                 print('  batch {} loss: {}'.format(i + 1, last_loss))
                 #wb_x = epoch_index * len(self.training_loader) + i + 1
                 wandb.log({'Loss/train (per batch)': last_loss})
@@ -144,6 +146,9 @@ class PEFTTraining:
             # Track best performance, and save the model's state
             if avg_vloss < best_vloss:
                 best_vloss = avg_vloss
+                if not os.path.exists(self.output_dir):
+                    os.makedirs(self.output_dir)
+
                 model_path = '{}/{}_{}.pth'.format(self.output_dir, self.model_name, epoch_number)
                 torch.save({'epoch': epoch_number,
                             'model_state_dict': self.model.state_dict(),
