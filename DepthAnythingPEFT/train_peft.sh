@@ -7,4 +7,4 @@
 #SBATCH --gres=gpu:a100-80:1
 #SBATCH --time=10:30:00
 
-python DepthAnything/scripts/run_training.py
+python depthest/Underwater_Depth_Estimation/DepthAnythingPEFT/run_training.py
