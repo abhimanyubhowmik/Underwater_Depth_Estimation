@@ -73,11 +73,9 @@ class EvaluationMetric:
         return ssim_value
 
 
-    def compute_metrics(self, input_image, outputs, gt_depth):
-        metrics = []
+    def compute_metrics(self, input_image, predicted_depth, gt_depth):
 
         with torch.no_grad():
-            predicted_depth = outputs
             img_size = fn.get_image_size(input_image)
             img_size.reverse()
             prediction = torch.nn.functional.interpolate(
@@ -114,9 +112,9 @@ class EvaluationMetric:
                 wandb.log({"Scale Invarience MSE (Logscale)": silog})
                 wandb.log({"Pearson Correlation": pearson_corr})
                 wandb.log({"PSNR (Scale and offset Invarience)": psnr_val})
-                wandb.log({"SSIM (Scale and offset Invarience)":ssim_val})
+                wandb.log({"SSIM (Scale and offset Invarience)": ssim_val})
 
-            metrics.append([absrel,silog,pearson_corr,psnr,ssim])
+            metrics = [absrel,silog,pearson_corr,psnr_val,ssim_val]
             
             return metrics
         
