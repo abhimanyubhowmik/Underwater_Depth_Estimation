@@ -1,6 +1,7 @@
 import os
 from torch.utils.data import Dataset
 from PIL import Image
+import torch 
 
 class FlSeaDataset(Dataset):
     def __init__(self, root_dir, transform=None):
@@ -90,6 +91,15 @@ class VAROSDataset(Dataset):
 
     def __len__(self):
         return len(self.data)
+    
+    def min_max_normalize(self,image):
+    # Get the minimum and maximum pixel values
+        min_val = torch.min(image)
+        max_val = torch.max(image)
+
+        # Normalize the image
+        normalized_image = (image - min_val) / (max_val - min_val)
+        return normalized_image
 
     def __getitem__(self, idx):
         image_path, depth_path = self.data[idx]
@@ -98,4 +108,6 @@ class VAROSDataset(Dataset):
         if self.transform:
             image = self.transform(image)
             depth = self.transform(depth)
+            depth = self.min_max_normalize(depth)
+            depth = 1 - depth   
         return image, depth
