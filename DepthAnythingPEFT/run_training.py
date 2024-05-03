@@ -1,6 +1,6 @@
 from Training import PEFTTraining
 from Model import DepthAnythingPEFT
-from Dataset import FlSeaDataset
+from Dataset import FlSeaDataset,VAROSDataset
 from peft import LoraConfig
 import torch
 from torch.utils.data import Subset
@@ -19,8 +19,10 @@ from torchvision.transforms import (
 ### Config
 EXPERIMENT_NUM = 10
 MODEL_CHECKPOINT = "LiheYoung/depth-anything-small-hf"
-DATASET_ROOT_DIR = "/mundus/abhowmik697/FLSea_Dataset"
-OUTPUT_DIR = f"DepthAnything/scripts/depth-anything-small-lora_{EXPERIMENT_NUM}"
+# DATASET_ROOT_DIR = "/mundus/abhowmik697/FLSea_Dataset"
+# OUTPUT_DIR = f"DepthAnything/scripts/depth-anything-small-lora_{EXPERIMENT_NUM}"
+DATASET_ROOT_DIR = "/home/mundus/konthuam709/depth_estimation/Varos/2021-08-17_SEQ1/vehicle0/cam0"
+OUTPUT_DIR = f"/home/mundus/konthuam709/depth_estimation/Underwater_Depth_Estimation/DepthAnythingPEFT/new_train_epochs/depth-anything-small-lora_{EXPERIMENT_NUM}"
 WANDB_USER = "researchpapers"
 WANDB_PROJECT = "peft_training"
 
@@ -41,7 +43,7 @@ MIN_LR = 1e-7
 WANDB_DATASET = "FLSEA-VI"
 
 # Grid Search
-WARMUP_PERIOD_PERCENTAGE_LIST = [40]
+WARMUP_PERIOD_PERCENTAGE_LIST = [30]
 LEARNING_RATE_LIST = [1e-3]
 EPOCH_LIST = [5]
 
@@ -57,7 +59,7 @@ data_transforms = Compose(
     ]
 )
 
-dataset = FlSeaDataset(root_dir= DATASET_ROOT_DIR, transform=data_transforms)
+dataset = VAROSDataset(root_dir= DATASET_ROOT_DIR, transform=data_transforms)
 useful_dataset_length = int(len(dataset) * DATA_USE_PERCENTAGE /100)
 print(f"Length of Dataset: {useful_dataset_length}")
 train_size = int(TRAIN_SPLIT * useful_dataset_length)

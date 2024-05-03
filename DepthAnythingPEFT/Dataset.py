@@ -84,8 +84,8 @@ class VAROSDataset(Dataset):
         for root, _, files in os.walk(self.root_dir):
             for file in files:
                     if 'A' in root:
-                        depth_path = os.path.join(root, file)
-                        image_path = os.path.join(root.replace('A', 'D'), file.replace('A', 'D'))
+                        image_path = os.path.join(root, file)
+                        depth_path = os.path.join(root.replace('A', 'D'), file.replace('A', 'D'))
                         data.append((image_path, depth_path))
         return data
 

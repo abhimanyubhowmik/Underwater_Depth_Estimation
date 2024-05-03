@@ -10,6 +10,7 @@ from torchvision.transforms import (
     Compose,
     RandomHorizontalFlip,
     RandomResizedCrop,
+    Resize,
     ToTensor,
 )
 import os
@@ -21,7 +22,7 @@ MODEL_CHECKPOINT = "LiheYoung/depth-anything-small-hf"
 # DATASET_ROOT_DIR = "D:\\EMJMD MIR\\france\\ddmp\\Varos\\2021-08-17_SEQ1\\vehicle0\\cam0"
 # DATASET_ROOT_DIR = "D:\\EMJMD MIR\\france\\ddmp\\Atlantis\\data_atlantis_sample00"
 DATASET_ROOT_DIR = "/home/mundus/konthuam709/depth_estimation/Varos/2021-08-17_SEQ1/vehicle0/cam0"
-OUTPUT_DIR = f"/home/mundus/konthuam709/depth_estimation/Underwater_Depth_Estimation/DepthAnythingPEFT/depth-anything-small-lora_{EXPERIMENT_NUM}"
+OUTPUT_DIR = f"/home/mundus/konthuam709/depth_estimation/Underwater_Depth_Estimation/DepthAnythingPEFT/new_train_epochs/depth-anything-small-lora_{EXPERIMENT_NUM}"
 WANDB_USER = "researchpapers"
 WANDB_PROJECT = "peft_training"
 WANDB_DATASET = "VAROS"
@@ -51,11 +52,13 @@ model = DepthAnythingPEFT(model_checkpoint = MODEL_CHECKPOINT)
 
 data_transforms = Compose(
     [
-        RandomResizedCrop(model.image_processor.size["height"]),
-        RandomHorizontalFlip(),
+        # RandomResizedCrop(model.image_processor.size["height"]),
+        # RandomHorizontalFlip(),
+        Resize((model.image_processor.size["height"],model.image_processor.size["width"]),interpolation=InterpolationMode.BICUBIC),
         ToTensor(),
     ]
 )
+
 
 dataset = VAROSDataset(root_dir= DATASET_ROOT_DIR, transform=data_transforms)
 useful_dataset_length = int(len(dataset) * DATA_USE_PERCENTAGE /100)
