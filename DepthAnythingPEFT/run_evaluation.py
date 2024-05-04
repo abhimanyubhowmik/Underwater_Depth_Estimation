@@ -1,6 +1,6 @@
 from transformers import AutoImageProcessor, AutoModelForDepthEstimation
 from Model import DepthAnythingPEFT
-from Dataset import FlSeaDataset
+from Dataset import FlSeaDataset,VAROSDataset
 import torch
 import pandas as pd
 from peft import LoraConfig
@@ -26,7 +26,7 @@ def model_evaluation(model,image_processor,dataset_root_dir,data_use_percentage,
     )
 
     print("Dataset Loaded")
-    dataset = FlSeaDataset(root_dir= dataset_root_dir, transform=data_transforms)
+    dataset = VAROSDataset(root_dir= dataset_root_dir, transform=data_transforms)
     useful_dataset_length = int(len(dataset) * data_use_percentage /100)
     useful_dataset = Subset(dataset,list(range(useful_dataset_length)))
     dataloder = torch.utils.data.DataLoader(useful_dataset, batch_size= batch_size, shuffle=True)
@@ -67,9 +67,9 @@ def main():
 
     # Parameters
     MODEL_CHECKPOINT = "LiheYoung/depth-anything-small-hf"
-    TRAINED_CHECKPOINT = "DepthAnything/scripts/model/depth-anything-small-hf_7.pth"
+    TRAINED_CHECKPOINT = "/home/mundus/konthuam709/depth_estimation/Underwater_Depth_Estimation/DepthAnythingPEFT/new_train_epochs/depth-anything-small-lora_10/depth-anything-small-hf_4.pth"
     IMAGE_PROCESSOR = AutoImageProcessor.from_pretrained("LiheYoung/depth-anything-small-hf")
-    DATASET_ROOT_DIR = "/mundus/abhowmik697/FLSea_Dataset"
+    DATASET_ROOT_DIR = "/home/mundus/konthuam709/depth_estimation/Varos/2021-08-17_SEQ1/vehicle0/cam0"
     DATA_USE_PERCENTAGE = 100
     BATCH_SIZE = 16
     LORA_RANK = 16
@@ -92,10 +92,10 @@ def main():
     lora_model.load_state_dict(checkpoint['model_state_dict'])
 
     # Output
-    OUTPUT_FILE_BEFORE = "DepthAnything/scripts/eval/without_training.csv"
+    OUTPUT_FILE_BEFORE = "eval/without_training.csv"
     model_evaluation(depth_anything.model,IMAGE_PROCESSOR,DATASET_ROOT_DIR,DATA_USE_PERCENTAGE,BATCH_SIZE,OUTPUT_FILE_BEFORE)
 
-    OUTPUT_FILE_AFTER = "DepthAnything/scripts/eval/training_8epochs.csv"
+    OUTPUT_FILE_AFTER = "eval/training_5epochs.csv"
     model_evaluation(lora_model,IMAGE_PROCESSOR,DATASET_ROOT_DIR,DATA_USE_PERCENTAGE,BATCH_SIZE,OUTPUT_FILE_AFTER)
 
 main()
