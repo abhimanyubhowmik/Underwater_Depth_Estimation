@@ -1,6 +1,6 @@
 from transformers import AutoImageProcessor, AutoModelForDepthEstimation
 from Model import DepthAnythingPEFT
-from Dataset import FlSeaDataset,VAROSDataset
+from Dataset import FlSeaDataset
 import torch
 import pandas as pd
 from peft import LoraConfig
@@ -8,9 +8,9 @@ from Evaluation import EvaluationMetric
 from torch.utils.data import Subset
 from torchvision.transforms import (
     Compose,
-    RandomHorizontalFlip,
-    RandomResizedCrop,
     ToTensor,
+    Resize,
+    InterpolationMode,
 )
 
 def model_evaluation(model,image_processor,dataset_root_dir,data_use_percentage,batch_size,output_file_name):
@@ -19,17 +19,18 @@ def model_evaluation(model,image_processor,dataset_root_dir,data_use_percentage,
 
     data_transforms = Compose(
         [
-            RandomResizedCrop(image_processor.size["height"]),
-            RandomHorizontalFlip(),
+            # RandomResizedCrop(image_processor.size["height"]),
+            # RandomHorizontalFlip(),
+            Resize((image_processor.size["height"],image_processor.size["width"]),interpolation=InterpolationMode.BICUBIC),
             ToTensor(),
         ]
     )
 
     print("Dataset Loaded")
-    dataset = VAROSDataset(root_dir= dataset_root_dir, transform=data_transforms)
+    dataset = FlSeaDataset(root_dir= dataset_root_dir, transform=data_transforms)
     useful_dataset_length = int(len(dataset) * data_use_percentage /100)
     useful_dataset = Subset(dataset,list(range(useful_dataset_length)))
-    dataloder = torch.utils.data.DataLoader(useful_dataset, batch_size= batch_size, shuffle=True)
+    dataloder = torch.utils.data.DataLoader(useful_dataset, batch_size= batch_size, shuffle= False)
 
     model.eval()
     evaluation = EvaluationMetric(False)
@@ -41,6 +42,8 @@ def model_evaluation(model,image_processor,dataset_root_dir,data_use_percentage,
         print("evaluation started...")
         for i, (inputs, labels) in enumerate(dataloder):
             inputs, labels = inputs.to(device),labels.to(device)
+            print('inputs',inputs.shape)
+            print('labels',labels.shape)
             outputs = model(inputs).predicted_depth
             metrics = evaluation.compute_metrics(inputs,outputs,labels)
             print(metrics)
@@ -49,7 +52,8 @@ def model_evaluation(model,image_processor,dataset_root_dir,data_use_percentage,
 
     print("evaluation ended; processing data...")
     # Create a DataFrame from the list of evaluation metrics
-    df = pd.DataFrame(all_metrics, columns=['absrel', 'silog', 'pearson_corr', 'psnr', 'ssim'])
+    df = pd.DataFrame(all_metrics, columns=['a1', 'a2', 'a3', 'abs_rel', 'rmse', 'log_10', 'rmse_log',
+                                            'silog', 'sq_rel', 'psnr','ssim','pearson_corr'])
 
     # Add a row for the sum of all metrics
     mean_row = df.mean()
@@ -67,9 +71,9 @@ def main():
 
     # Parameters
     MODEL_CHECKPOINT = "LiheYoung/depth-anything-small-hf"
-    TRAINED_CHECKPOINT = "/home/mundus/konthuam709/depth_estimation/Underwater_Depth_Estimation/DepthAnythingPEFT/new_train_epochs/depth-anything-small-lora_10/depth-anything-small-hf_4.pth"
+    TRAINED_CHECKPOINT = "DepthAnything/scripts/depth-anything-small-lora_10/depth-anything-small-hf_4.pth"
     IMAGE_PROCESSOR = AutoImageProcessor.from_pretrained("LiheYoung/depth-anything-small-hf")
-    DATASET_ROOT_DIR = "/home/mundus/konthuam709/depth_estimation/Varos/2021-08-17_SEQ1/vehicle0/cam0"
+    DATASET_ROOT_DIR = "/mundus/abhowmik697/FLSea_Dataset"
     DATA_USE_PERCENTAGE = 100
     BATCH_SIZE = 16
     LORA_RANK = 16
@@ -79,6 +83,11 @@ def main():
 
     # Model Loading
     depth_anything = DepthAnythingPEFT(model_checkpoint = MODEL_CHECKPOINT)
+
+    # Before 
+    OUTPUT_FILE_BEFORE = "DepthAnything/scripts/eval/without_training.csv"
+    model_evaluation(depth_anything.model,IMAGE_PROCESSOR,DATASET_ROOT_DIR,DATA_USE_PERCENTAGE,BATCH_SIZE,OUTPUT_FILE_BEFORE)
+
     peft_config = LoraConfig(
         r=LORA_RANK,
         lora_alpha=LORA_ALPHA,
@@ -91,11 +100,8 @@ def main():
     checkpoint = torch.load(TRAINED_CHECKPOINT)
     lora_model.load_state_dict(checkpoint['model_state_dict'])
 
-    # Output
-    OUTPUT_FILE_BEFORE = "eval/without_training.csv"
-    model_evaluation(depth_anything.model,IMAGE_PROCESSOR,DATASET_ROOT_DIR,DATA_USE_PERCENTAGE,BATCH_SIZE,OUTPUT_FILE_BEFORE)
-
-    OUTPUT_FILE_AFTER = "eval/training_5epochs.csv"
+    # After
+    OUTPUT_FILE_AFTER = "DepthAnything/scripts/eval/training_5epochs.csv"
     model_evaluation(lora_model,IMAGE_PROCESSOR,DATASET_ROOT_DIR,DATA_USE_PERCENTAGE,BATCH_SIZE,OUTPUT_FILE_AFTER)
 
 main()
