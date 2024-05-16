@@ -1,6 +1,6 @@
 from transformers import AutoImageProcessor, AutoModelForDepthEstimation
 from Model import DepthAnythingPEFT
-from Dataset import FlSeaDataset
+from Dataset import FlSeaDataset,VAROSDataset
 import torch
 import pandas as pd
 from peft import LoraConfig
@@ -27,7 +27,7 @@ def model_evaluation(model,image_processor,dataset_root_dir,data_use_percentage,
     )
 
     print("Dataset Loaded")
-    dataset = FlSeaDataset(root_dir= dataset_root_dir, transform=data_transforms)
+    dataset = VAROSDataset(root_dir= dataset_root_dir, transform=data_transforms)
     useful_dataset_length = int(len(dataset) * data_use_percentage /100)
     useful_dataset = Subset(dataset,list(range(useful_dataset_length)))
     dataloder = torch.utils.data.DataLoader(useful_dataset, batch_size= batch_size, shuffle= False)
@@ -71,12 +71,12 @@ def main():
 
     # Parameters
     MODEL_CHECKPOINT = "LiheYoung/depth-anything-small-hf"
-    TRAINED_CHECKPOINT = "DepthAnything/scripts/depth-anything-small-lora_10/depth-anything-small-hf_4.pth"
+    TRAINED_CHECKPOINT = "/home/mundus/konthuam709/depth_estimation/Underwater_Depth_Estimation/DepthAnythingPEFT/depth-anything-small-lora_41/depth-anything-small-hf_3.pth"
     IMAGE_PROCESSOR = AutoImageProcessor.from_pretrained("LiheYoung/depth-anything-small-hf")
-    DATASET_ROOT_DIR = "/mundus/abhowmik697/FLSea_Dataset"
-    DATA_USE_PERCENTAGE = 100
-    BATCH_SIZE = 16
-    LORA_RANK = 16
+    DATASET_ROOT_DIR = "/home/mundus/konthuam709/depth_estimation/Varos/2021-08-17_SEQ1/vehicle0/cam0"
+    DATA_USE_PERCENTAGE = 20
+    BATCH_SIZE = 32
+    LORA_RANK = 32
     LORA_ALPHA = 32
     LORA_DROPOUT = 0.001
     BIAS = "lora_only"
@@ -85,7 +85,7 @@ def main():
     depth_anything = DepthAnythingPEFT(model_checkpoint = MODEL_CHECKPOINT)
 
     # Before 
-    OUTPUT_FILE_BEFORE = "DepthAnything/scripts/eval/without_training.csv"
+    OUTPUT_FILE_BEFORE = "/home/mundus/konthuam709/depth_estimation/Underwater_Depth_Estimation/DepthAnythingPEFT/eval/debugged/20_percent/without_training.csv"
     model_evaluation(depth_anything.model,IMAGE_PROCESSOR,DATASET_ROOT_DIR,DATA_USE_PERCENTAGE,BATCH_SIZE,OUTPUT_FILE_BEFORE)
 
     peft_config = LoraConfig(
@@ -101,7 +101,7 @@ def main():
     lora_model.load_state_dict(checkpoint['model_state_dict'])
 
     # After
-    OUTPUT_FILE_AFTER = "DepthAnything/scripts/eval/training_5epochs.csv"
+    OUTPUT_FILE_AFTER = "/home/mundus/konthuam709/depth_estimation/Underwater_Depth_Estimation/DepthAnythingPEFT/eval/debugged/20_percent/training_5epochs.csv"
     model_evaluation(lora_model,IMAGE_PROCESSOR,DATASET_ROOT_DIR,DATA_USE_PERCENTAGE,BATCH_SIZE,OUTPUT_FILE_AFTER)
 
 main()
