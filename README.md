@@ -4,8 +4,8 @@
 
 [Abhimanyu Bhowmik](https://github.com/abhimanyubhowmik), [Madhushree Sannigrahi](https://github.com/Madhushree2000), [Krittapat Onthuam](https://github.com/tamonmaru)
 
-[![report](https://img.shields.io/badge/Initial-Report-brightgreen)](https://doi.org/10.1109/BigData55660.2022.10020494) 
-[![slides](https://img.shields.io/badge/Presentation-Slides-yellow)](https://docs.google.com/presentation/d/1btUACelHTbZ4aX9lCH3yg1O-jxsZWn4l/edit?usp=sharing&ouid=103859519837437819731&rtpof=true&sd=true) 
+[![report](https://img.shields.io/badge/Initial-Report-brightgreen)](https://github.com/abhimanyubhowmik/Underwater_Depth_Estimation/blob/main/Report/DepthDive.pdf) 
+[![slides](https://img.shields.io/badge/Presentation-Slides-yellow)](https://docs.google.com/presentation/d/1lmiLqsiifWMmET5kIFi9zD4oFJeV8fzxxEENVJWg-zc/edit?usp=sharing) 
 
 <!-- [![dataset](https://img.shields.io/badge/Kaggle-Dataset-blue)](https://www.kaggle.com/competitions/ieee-fraud-detection) 
 [![dataset](https://img.shields.io/badge/Saved-Models-red)](https://github.com/abhimanyubhowmik/DBNex/tree/main/Data_and_Model) -->
