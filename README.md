@@ -2,7 +2,7 @@
  
 <h1> DepthDive: Enhanced Underwater Depth Estimation using Monocular Images</h1>
 
-[Abhimanyu Bhowmik](https://github.com/abhimanyubhowmik), [Madhushree Sannigrahi](https://github.com/Madhushree2000), [Krittapat Onthuam](https://github.com/tamonmaru), 
+[Abhimanyu Bhowmik](https://github.com/abhimanyubhowmik), [Madhushree Sannigrahi](https://github.com/Madhushree2000), [Krittapat Onthuam](https://github.com/tamonmaru)
 
 [![report](https://img.shields.io/badge/Initial-Report-brightgreen)](https://doi.org/10.1109/BigData55660.2022.10020494) 
 [![slides](https://img.shields.io/badge/Presentation-Slides-yellow)](https://docs.google.com/presentation/d/1btUACelHTbZ4aX9lCH3yg1O-jxsZWn4l/edit?usp=sharing&ouid=103859519837437819731&rtpof=true&sd=true) 
@@ -66,8 +66,8 @@ Utilising the same approach as MiDas, DepthAnything is a state-of-the-art monocu
 <br><br>
 
 <div align="center">
-<img src = "./Images/Main.png" width="100%">
-<p>Overall view of the proposed model: DBNex </p>
+<img src = "Images/pipeline.png" width="100%">
+<p> DepthAnything Model</p>
 </div>
 
 <br>
@@ -105,6 +105,16 @@ we analyzed almost all available underwater datasets to combine them for trainin
 
 For real-world datasets, we often get inaccurate ground truth values. If we finetune our model on those data points, the model might learn biased distributions of depth maps. To avoid this, we developed a method, which can eliminate inaccurate ground truths, providing a better dataset for model fine-tuning. Our method includes converting RGB images to RMI input space, which takes into account underwater light characteristics of propagation. The red wavelength suffers more aggressive attenuation underwater, so the relative differences between {R} channel and {G, B} channel values can provide useful depth information for a given pixel. We take the maximum value of {B} and {G} channels and mask the pixels, which have zero depth values in the ground truth. The resultant images are given in figure.
 
+<div align="center">
+<table>
+  <tr>
+    <td width="50%"> <img src = "Images/Filtering.png" width="100%"><br>(a) </td>
+    <td width="50%"> <img src = "Images/good copy.jpg" width="100%"><br>(b) </td>
+  </tr>
+</table>
+<p>(a) Data Sample Filtering procedure, (b) Results after using the filter method.</p>
+</div>
+<br><br>
 <!--
   ====================================RESULTS===============================
                           -->
@@ -143,7 +153,23 @@ For real-world datasets, we often get inaccurate ground truth values. If we fine
 | SeaThru (D3 and D5) | NewCRFs-Atlantis \cite{zhang2023atlantis} | 1.683 | 1.4764 | 1.435 | 0.378 | 0.476 | 0.837 | 0.952 |
 | SeaThru (D3 and D5) | **Ours** | **0.7925** | **0.9480** | 1.6575 | 0.8268 | 0.1797 | 0.4052 | 0.6128 |
 
+<br><br>
 
+<div align="center">
+<img src = "Images/PSNR_SSIM.jpeg" width="100%">
+<p> PSNR and SSIM plot for various Synthetic Data Ratio</p>
+</div>
+
+<br>
+
+<br><br>
+
+<div align="center">
+<img src = "Images/discussion2.jpeg" width="100%">
+<p> (A) Image samples before training, (B) Image samples after training</p>
+</div>
+
+<br>
 
 <!-- <hr />
 
