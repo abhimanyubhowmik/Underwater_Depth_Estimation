@@ -82,15 +82,15 @@ Utilising the same approach as MiDas, DepthAnything is a state-of-the-art monocu
 
 | Metric                            | Definition |
 |-----------------------------------|------------|
-| **Absolute Relative Error (AbsRel)** | $ \text{AbsRel} = \frac{1}{n} \sum_{i=1}^{n} \frac{\|d_i - \hat{d}_i\|}{d_i} $ |
-| **Squared Relative Error (SqRel)** | $ \text{SqRel} = \frac{1}{n} \sum_{i=1}^{n} \frac{(d_i - \hat{d}_i)^2}{d_i} $ |
-| **Root Mean Squared Error (RMSE)** | $ \text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (d_i - \hat{d}_i)^2} $ |
-| **Logarithmic RMSE**              | $ \text{RMSElog} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (\log d_i - \log \hat{d}_i)^2} $ |
-| **Scale Invariant MSE in Log Scale (SiLog)** | $ \text{SiLog} = \sqrt{\mathbb{E}\left[ (\log(\hat{d}) - \log(d))^2 \right] - \left( \mathbb{E}\left[ \log(\hat{d}) - \log(d) \right] \right)^2} $ |
-| **Peak Signal-to-Noise Ratio (PSNR)** | $ \text{PSNR} = 10 \log_{10} \left(\frac{\text{MAX}^2_d}{\sqrt{\text{MSE}}}\right) $ |
-| **Structural Similarity Index (SSIM)** | $ \text{SSIM}(d, \hat{d}) = \frac{(2 \mu_d \mu_{\hat{d}} + C_1)(2 \sigma_{d \hat{d}} + C_2)}{(\mu_d^2 + \mu_{\hat{d}}^2 + C_1)(\sigma_d^2 + \sigma_{\hat{d}}^2 + C_2)} $ |
-| **Pearson Correlation**           | $ \text{r} = \frac{\sum_{i=1}^{n} (d_i - \bar{d})(\hat{d}_i - \bar{\hat{d}})}{\sqrt{\sum_{i=1}^{n} (d_i - \bar{d})^2 \sum_{i=1}^{n} (\hat{d}_i - \bar{\hat{d}})^2}} $ |
-| **$\delta_i$**                    | $ \delta_i = \text{percentage of } \left(\max\left(\frac{d}{\hat{d}}, \frac{\hat{d}}{d}\right) < 1.25^i\right) $ |
+| **Absolute Relative Error (AbsRel)** | $`\text{AbsRel} = \frac{1}{n} \sum_{i=1}^{n} \frac{\|d_i - \hat{d}_i\|}{d_i}`$ |
+| **Squared Relative Error (SqRel)** | $`\text{SqRel} = \frac{1}{n} \sum_{i=1}^{n} \frac{(d_i - \hat{d}_i)^2}{d_i}`$ |
+| **Root Mean Squared Error (RMSE)** | $`\text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (d_i - \hat{d}_i)^2}`$ |
+| **Logarithmic RMSE**              | $`\text{RMSElog} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (\log d_i - \log \hat{d}_i)^2}`$ |
+| **Scale Invariant MSE in Log Scale (SiLog)** | $`\text{SiLog} = \sqrt{\mathbb{E}\left[ (\log(\hat{d}) - \log(d))^2 \right] - \left( \mathbb{E}\left[ \log(\hat{d}) - \log(d) \right] \right)^2}`$ |
+| **Peak Signal-to-Noise Ratio (PSNR)** | $`\text{PSNR} = 10 \log_{10} \left(\frac{\text{MAX}^2_d}{\sqrt{\text{MSE}}}\right)`$ |
+| **Structural Similarity Index (SSIM)** | $`\text{SSIM}(d, \hat{d}) = \frac{(2 \mu_d \mu_{\hat{d}} + C_1)(2 \sigma_{d \hat{d}} + C_2)}{(\mu_d^2 + \mu_{\hat{d}}^2 + C_1)(\sigma_d^2 + \sigma_{\hat{d}}^2 + C_2)}`$ |
+| **Pearson Correlation**           | $`\text{r} = \frac{\sum_{i=1}^{n} (d_i - \bar{d})(\hat{d}_i - \bar{\hat{d}})}{\sqrt{\sum_{i=1}^{n} (d_i - \bar{d})^2 \sum_{i=1}^{n} (\hat{d}_i - \bar{\hat{d}})^2}}`$ |
+| **$\delta_i$**                    | $`\delta_i = \text{percentage of } \left(\max\left(\frac{d}{\hat{d}}, \frac{\hat{d}}{d}\right) < 1.25^i\right)`$ |
 
 <!--
   ============================Model=========================
